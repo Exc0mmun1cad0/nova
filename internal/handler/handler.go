@@ -1,4 +1,4 @@
-package tcp
+package handler
 
 import (
 	"log/slog"
@@ -12,23 +12,23 @@ type Storage interface {
 }
 
 type Handler struct {
-	log     slog.Logger
+	log     *slog.Logger
 	storage Storage
-	dict    map[string]handler
+	dict    map[string]handlerFunc
 }
 
-func NewHandler(log slog.Logger, storage Storage) *Handler {
+func NewHandler(log *slog.Logger, storage Storage) *Handler {
 	h := &Handler{
 		log:     log,
 		storage: storage,
 	}
 
-	dict := map[string]handler{
+	dict := map[string]handlerFunc{
 		cmdPing: h.pingHandler,
 		cmdEcho: h.echoHandler,
 
-        cmdGet: h.getHandler,
-        cmdSet: h.setHandler,
+		cmdGet: h.getHandler,
+		cmdSet: h.setHandler,
 	}
 
 	h.dict = dict

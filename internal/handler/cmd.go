@@ -1,4 +1,4 @@
-package tcp
+package handler
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type handler func([]string) []byte
+type handlerFunc func([]string) []byte
 
 var (
 	cmdInfo = "info"
