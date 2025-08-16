@@ -25,7 +25,6 @@ func EncodeString(str string) []byte {
 	return []byte(res)
 }
 
-// TODO: it doesn't work with INFO command when iredis starts
 func EncodeArray(strs []string) []byte {
 	var b bytes.Buffer
 
@@ -38,4 +37,9 @@ func EncodeArray(strs []string) []byte {
 	}
 
 	return b.Bytes()
+}
+
+func EncodeInt(num int) []byte {
+	res := fmt.Sprintf(":%d\r\n", num)
+	return []byte(res)
 }
