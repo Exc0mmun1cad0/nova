@@ -1,3 +1,4 @@
+// Package mapstorage contains implementation of key-value storage with ordinary map type.
 package mapstorage
 
 import (
@@ -10,6 +11,7 @@ var (
 	defaultCleanupInterval = 1 * time.Minute
 )
 
+// item represents a value in storage with expiration time.
 type item struct {
 	value     string
 	expiresAt time.Time
@@ -61,6 +63,7 @@ func (s *Storage) Get(key string) (string, bool) {
 	return item.value, true
 }
 
+// cleanup is a background worker which deletes expired values every (cleanupInterval) seconds.
 func (s *Storage) cleanup(ctx context.Context) {
 	ticker := time.NewTicker(s.cleanupInterval)
 
