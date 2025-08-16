@@ -41,7 +41,7 @@ func (h *Handler) Serve(args []string) []byte {
 
 	handler, ok := h.dict[cmd]
 	if !ok {
-		return resp.EncodeError("Unknown command")
+		return resp.EncodeError(ErrUnknownCmd)
 	}
 
 	return handler(args)
