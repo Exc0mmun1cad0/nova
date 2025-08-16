@@ -50,27 +50,33 @@ func (h *Handler) getHandler(args []string) []byte {
 }
 
 func (h *Handler) setHandler(args []string) []byte {
-	if len(args) < 3 {
+	switch {
+	case len(args) == 3:
+		key, value := args[1], args[2]
+		h.storage.Set(key, value, 0)
+		return resp.EncodeSimpleString("OK")
+
+	case len(args) < 3:
 		return resp.EncodeError(fmt.Sprintf(ErrWrongNumberOfArgs, cmdGet))
-	} else if len(args) > 3 {
-		switch strings.ToLower(args[3]) {
-		case "px":
+
+	case len(args) > 3:
+		if strings.ToLower(args[3]) == "px" {
 			if len(args) > 5 {
 				return resp.EncodeError(ErrSyntax)
 			}
+
 			ttl, err := strconv.Atoi(args[4])
 			if err != nil {
 				// TODO: should be completely another error. I'll definitely fix it
 				return resp.EncodeError(ErrSyntax)
 			}
+
 			key, value := args[1], args[2]
 			h.storage.Set(key, value, time.Duration(ttl)*time.Millisecond)
-		default:
-			return resp.EncodeError(ErrSyntax)
+			return resp.EncodeSimpleString("OK")
 		}
-	} else {
-		key, value := args[1], args[2]
-		h.storage.Set(key, value, 0)
+
+		return resp.EncodeError(ErrSyntax)
 	}
 
 	return resp.EncodeSimpleString("OK")
