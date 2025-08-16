@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log/slog"
+	"nova/pkg/resp"
 	"strings"
 	"time"
 )
@@ -38,5 +39,10 @@ func NewHandler(log *slog.Logger, storage Storage) *Handler {
 func (h *Handler) Serve(args []string) []byte {
 	cmd := strings.ToLower(args[0])
 
-	return h.dict[cmd](args)
+	handler, ok := h.dict[cmd]
+	if !ok {
+		return resp.EncodeError("Unknown command")
+	}
+
+	return handler(args)
 }
