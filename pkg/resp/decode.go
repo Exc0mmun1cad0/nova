@@ -1,9 +1,13 @@
 package resp
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 	"strings"
+)
+
+var (
+	errInvalidMultibulk = errors.New("invalid multibulk length")
 )
 
 // Decode decodes array of strings from resp protocol.
@@ -12,7 +16,7 @@ func Decode(msg []byte) ([]string, error) {
 
 	argsCount, err := strconv.Atoi(args[0][1:])
 	if err != nil {
-		return nil, fmt.Errorf("invalid number of args: %v", err)
+		return nil, errInvalidMultibulk
 	}
 
 	cmd := make([]string, 0, argsCount)
