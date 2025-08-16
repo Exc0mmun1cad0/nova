@@ -11,11 +11,12 @@ import (
 type handlerFunc func([]string) []byte
 
 var (
-	cmdInfo = "info"
-	cmdPing = "ping"
-	cmdEcho = "echo"
-	cmdGet  = "get"
-	cmdSet  = "set"
+	cmdInfo   = "info"
+	cmdPing   = "ping"
+	cmdEcho   = "echo"
+	cmdGet    = "get"
+	cmdSet    = "set"
+	cmdDelete = "del"
 )
 
 var (
@@ -73,4 +74,13 @@ func (h *Handler) setHandler(args []string) []byte {
 	}
 
 	return resp.EncodeSimpleString("OK")
+}
+
+func (h *Handler) deleteHandler(args []string) []byte {
+	if len(args) < 2 {
+		return resp.EncodeError(fmt.Sprintf(ErrWrongNumberOfArgs, cmdDelete))
+	}
+
+	count := h.storage.DeleteMany(args[1:])
+	return resp.EncodeInt(count)
 }

@@ -63,6 +63,21 @@ func (s *Storage) Get(key string) (string, bool) {
 	return item.value, true
 }
 
+func (s *Storage) DeleteMany(keys []string) int {
+	count := 0
+
+	s.mu.Lock()
+	for _, key := range keys {
+		if el, ok := s.data[key]; ok && !isExpired(el) {
+			delete(s.data, key)
+			count++
+		}
+	}
+	s.mu.Unlock()
+
+	return count
+}
+
 // cleanup is a background worker which deletes expired values every (cleanupInterval) seconds.
 func (s *Storage) cleanup(ctx context.Context) {
 	ticker := time.NewTicker(s.cleanupInterval)

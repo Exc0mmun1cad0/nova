@@ -11,6 +11,7 @@ import (
 type Storage interface {
 	Set(key, value string, ttl time.Duration)
 	Get(key string) (string, bool)
+	DeleteMany(keys []string) int
 }
 
 type Handler struct {
@@ -29,8 +30,9 @@ func NewHandler(log *slog.Logger, storage Storage) *Handler {
 		cmdPing: h.pingHandler,
 		cmdEcho: h.echoHandler,
 
-		cmdGet: h.getHandler,
-		cmdSet: h.setHandler,
+		cmdGet:    h.getHandler,
+		cmdSet:    h.setHandler,
+		cmdDelete: h.deleteHandler,
 	}
 
 	h.dict = dict
