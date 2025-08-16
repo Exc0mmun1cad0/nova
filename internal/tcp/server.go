@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"nova/pkg/resp"
 )
 
 type Handler interface {
-	Serve([]string) []byte
+	Serve([]byte) []byte
 }
 
 type Server struct {
@@ -48,13 +47,11 @@ func (s *Server) handleConn(conn net.Conn) {
 			fmt.Printf("failed to read request due to: %v", err.Error())
 		}
 
-		cmd, _ := resp.Decode(buff[:n])
-		resp := s.Handler.Serve(cmd)
+		// cmd, _ := resp.Decode(buff[:n])
+		resp := s.Handler.Serve(buff[:n])
 		fmt.Println("response:", string(resp))
 
 		n, err = conn.Write(resp)
 		fmt.Println(n, err)
-
-		fmt.Println(cmd)
 	}
 }

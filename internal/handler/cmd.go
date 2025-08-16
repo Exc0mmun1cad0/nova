@@ -22,6 +22,7 @@ var (
 	ErrUnknownCmd        = "Unknown command"
 	ErrWrongNumberOfArgs = "Wrong number of arguments for '%s' command"
 	ErrSyntax            = "syntax error"
+	ErrProtocol          = "Protocol error"
 )
 
 func (h *Handler) pingHandler(args []string) []byte {
