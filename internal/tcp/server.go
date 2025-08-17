@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -16,8 +19,29 @@ type Handler interface {
 }
 
 type Server struct {
+	log *zap.Logger
+
+	// mutex for safe concurrent access from multiple simultanious connections
+	mu             sync.Mutex
+	connCounter    uint64
+	requestCounter uint64
+
 	Addr    string
 	Handler Handler
+}
+
+func NewServer(addr string, handler Handler, log *zap.Logger) (*Server, error) {
+	if log == nil {
+		return nil, errors.New("logger cannot be nil")
+	}
+
+	return &Server{
+		Addr:           addr,
+		Handler:        handler,
+		log:            log,
+		connCounter:    0,
+		requestCounter: 0,
+	}, nil
 }
 
 func (s *Server) ListenAndServe() {
@@ -25,7 +49,9 @@ func (s *Server) ListenAndServe() {
 	if err != nil {
 		panic(err)
 	}
+	s.log.Info("created tcp socket listener", zap.String("address", s.Addr))
 
+	s.log.Info("listening for incoming connections")
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -33,29 +59,45 @@ func (s *Server) ListenAndServe() {
 			continue
 		}
 
-		fmt.Println("got new connection")
 		go s.handleConn(conn)
 	}
 }
 
 func (s *Server) handleConn(conn net.Conn) {
+	s.mu.Lock()
+	log := s.log.With(zap.Uint64("conn_id", s.connCounter))
+	s.connCounter++
+	s.mu.Unlock()
+
+	log.Info("accepted new connection")
 	for {
 		buff := make([]byte, buffSize)
 		n, err := conn.Read(buff)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				fmt.Println("connection closed. Maybe...")
 				break
 			}
 
-			fmt.Printf("failed to read request due to: %v", err.Error())
+			log.Error("failed to read request", zap.Error(err))
+			continue
 		}
 
-		// cmd, _ := resp.Decode(buff[:n])
+		s.mu.Lock()
+		log := s.log.With(zap.Uint64("request_id", s.requestCounter))
+		s.requestCounter++
+		s.mu.Unlock()
+
+		log.Info("received request", zap.String("request", "here request text"))
 		resp := s.Handler.Serve(buff[:n])
-		fmt.Println("response:", string(resp))
+		log.Info("completed request", zap.String("response", "here response text"))
 
 		n, err = conn.Write(resp)
-		fmt.Println(n, err)
+		if err != nil {
+			log.Error("failed to send response", zap.Error(err))
+			continue
+		}
+		log.Info("sent response", zap.Int("bytes", n))
 	}
+
+	log.Info("connection closed")
 }

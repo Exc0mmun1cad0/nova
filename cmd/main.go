@@ -15,18 +15,20 @@ var (
 )
 
 func main() {
-
-	storage := mapstorage.New(context.Background())
-
 	log := setupLogger()
 
-	handler := handler.NewHandler(log, storage)
+	log.Info("starting nova")
 
-	srv := &tcp.Server{
-		Addr:    addr,
-		Handler: handler,
+	log.Info("initializing storage")
+	storage := mapstorage.New(context.Background())
+
+	handler := handler.NewHandler(log, storage)
+	srv, err := tcp.NewServer(addr, handler, log)
+	if err != nil {
+		log.Panic("failed to init tcp server", zap.Error(err))
 	}
 
+	// TODO: wrap in MustRun() function
 	srv.ListenAndServe()
 }
 
