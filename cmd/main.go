@@ -5,6 +5,7 @@ import (
 	"nova/internal/handler"
 	mapstorage "nova/internal/storage/map"
 	"nova/internal/tcp"
+	"nova/pkg/logger"
 
 	"go.uber.org/zap"
 )
@@ -15,7 +16,7 @@ var (
 )
 
 func main() {
-	log := setupLogger()
+	log := logger.Setup()
 
 	log.Info("starting nova")
 
@@ -33,10 +34,4 @@ func main() {
 
 	// TODO: wrap in MustRun() function
 	srv.ListenAndServe()
-}
-
-// TODO: add more options
-func setupLogger() *zap.Logger {
-	logger := zap.Must(zap.NewProduction())
-	return logger
 }
