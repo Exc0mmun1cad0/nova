@@ -87,16 +87,16 @@ func (s *Server) handleConn(conn net.Conn) {
 		s.requestCounter++
 		s.mu.Unlock()
 
-		log.Info("received request", zap.String("request", "here request text"))
+		log.Info("received request", zap.Int("bytes", n), zap.String("request", "here request text"))
 		resp := s.Handler.Serve(buff[:n])
-		log.Info("completed request", zap.String("response", "here response text"))
 
 		n, err = conn.Write(resp)
 		if err != nil {
 			log.Error("failed to send response", zap.Error(err))
 			continue
 		}
-		log.Info("sent response", zap.Int("bytes", n))
+
+		log.Info("sent response", zap.Int("bytes", n), zap.String("response", "here response text"))
 	}
 
 	log.Info("connection closed")
