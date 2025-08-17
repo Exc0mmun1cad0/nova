@@ -6,9 +6,11 @@ import (
 	"go.uber.org/zap"
 )
 
+type key string
+
 var (
 	// Key that can be used to get the logger from the request context.
-	loggerKey = "logger"
+	loggerKey key = "logger"
 )
 
 func FromContext(ctx context.Context) *zap.Logger {
