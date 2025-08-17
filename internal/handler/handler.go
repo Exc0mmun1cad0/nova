@@ -41,7 +41,7 @@ func NewHandler(storage Storage) *Handler {
 }
 
 func (h *Handler) Serve(ctx context.Context, input []byte) []byte {
-	log, _ := l.FromContext(ctx)
+	log := l.FromContext(ctx)
 
 	args, err := resp.Decode(input)
 	if err != nil {
@@ -55,5 +55,5 @@ func (h *Handler) Serve(ctx context.Context, input []byte) []byte {
 		return resp.EncodeError(ErrUnknownCmd)
 	}
 
-	return handler(args)
+	return handler(ctx, args)
 }

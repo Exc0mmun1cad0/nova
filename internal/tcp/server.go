@@ -98,8 +98,7 @@ func (s *Server) handleConn(conn net.Conn) {
 			log.Error("failed to send response", zap.Error(err))
 			continue
 		}
-
-		log.Info("sent response", zap.Int("bytes", n), zap.String("response", "here response text"))
+		log.Info("sent response", zap.Int("bytes", n))
 	}
 
 	log.Info("connection closed")
