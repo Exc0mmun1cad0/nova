@@ -5,8 +5,6 @@ import (
 	"nova/pkg/resp"
 	"strings"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 type Storage interface {
@@ -16,14 +14,12 @@ type Storage interface {
 }
 
 type Handler struct {
-	log     *zap.Logger
 	storage Storage
 	dict    map[string]handlerFunc
 }
 
-func NewHandler(log *zap.Logger, storage Storage) *Handler {
+func NewHandler(storage Storage) *Handler {
 	h := &Handler{
-		log:     log,
 		storage: storage,
 	}
 

@@ -22,8 +22,11 @@ func main() {
 	log.Info("initializing storage")
 	storage := mapstorage.New(context.Background())
 
-	handler := handler.NewHandler(log, storage)
-	srv, err := tcp.NewServer(addr, handler, log)
+	srv, err := tcp.NewServer(
+		addr,
+		handler.NewHandler(storage),
+		log,
+	)
 	if err != nil {
 		log.Panic("failed to init tcp server", zap.Error(err))
 	}

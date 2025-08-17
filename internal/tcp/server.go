@@ -83,7 +83,7 @@ func (s *Server) handleConn(conn net.Conn) {
 		}
 
 		s.mu.Lock()
-		log := s.log.With(zap.Uint64("request_id", s.requestCounter))
+		log := log.With(zap.Uint64("request_id", s.requestCounter))
 		s.requestCounter++
 		s.mu.Unlock()
 
