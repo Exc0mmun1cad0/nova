@@ -2,10 +2,11 @@ package handler
 
 import (
 	"fmt"
-	"log/slog"
 	"nova/pkg/resp"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type Storage interface {
@@ -15,12 +16,12 @@ type Storage interface {
 }
 
 type Handler struct {
-	log     *slog.Logger
+	log     *zap.Logger
 	storage Storage
 	dict    map[string]handlerFunc
 }
 
-func NewHandler(log *slog.Logger, storage Storage) *Handler {
+func NewHandler(log *zap.Logger, storage Storage) *Handler {
 	h := &Handler{
 		log:     log,
 		storage: storage,

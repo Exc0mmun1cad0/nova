@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"nova/internal/handler"
 	mapstorage "nova/internal/storage/map"
 	"nova/internal/tcp"
-	"os"
+
+	"go.uber.org/zap"
 )
 
 // TODO: move to configuration module (or package)
@@ -15,9 +15,10 @@ var (
 )
 
 func main() {
+
 	storage := mapstorage.New(context.Background())
 
-	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	log := setupLogger()
 
 	handler := handler.NewHandler(log, storage)
 
@@ -27,4 +28,10 @@ func main() {
 	}
 
 	srv.ListenAndServe()
+}
+
+// TODO: add more options
+func setupLogger() *zap.Logger {
+	logger := zap.Must(zap.NewProduction())
+	return logger
 }
