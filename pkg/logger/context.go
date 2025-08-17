@@ -11,9 +11,12 @@ var (
 	loggerKey = "logger"
 )
 
-func FromContext(ctx context.Context) (*zap.Logger, bool) {
+func FromContext(ctx context.Context) *zap.Logger {
 	l, ok := ctx.Value(loggerKey).(*zap.Logger)
-	return l, ok
+	if !ok {
+		panic("object of wrong type is available via logger key")
+	}
+	return l
 }
 
 func WithLogger(ctx context.Context, logger *zap.Logger) context.Context {
