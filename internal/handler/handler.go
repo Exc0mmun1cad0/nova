@@ -1,10 +1,14 @@
 package handler
 
 import (
+	"context"
 	"fmt"
+	l "nova/pkg/logger"
 	"nova/pkg/resp"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type Storage interface {
@@ -36,11 +40,14 @@ func NewHandler(storage Storage) *Handler {
 	return h
 }
 
-func (h *Handler) Serve(input []byte) []byte {
+func (h *Handler) Serve(ctx context.Context, input []byte) []byte {
+	log, _ := l.FromContext(ctx)
+
 	args, err := resp.Decode(input)
 	if err != nil {
 		return resp.EncodeError(fmt.Sprintf(ErrProtocol, err.Error()))
 	}
+	log.Info("decoded request", zap.Strings("args", args))
 
 	cmd := strings.ToLower(args[0])
 	handler, ok := h.dict[cmd]

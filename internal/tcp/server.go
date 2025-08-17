@@ -1,10 +1,12 @@
 package tcp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net"
+	l "nova/pkg/logger"
 	"sync"
 
 	"go.uber.org/zap"
@@ -15,7 +17,7 @@ var (
 )
 
 type Handler interface {
-	Serve([]byte) []byte
+	Serve(context.Context, []byte) []byte
 }
 
 type Server struct {
@@ -88,7 +90,8 @@ func (s *Server) handleConn(conn net.Conn) {
 		s.mu.Unlock()
 
 		log.Info("received request", zap.Int("bytes", n), zap.String("request", "here request text"))
-		resp := s.Handler.Serve(buff[:n])
+		ctx := l.WithLogger(context.Background(), log)
+		resp := s.Handler.Serve(ctx, buff[:n])
 
 		n, err = conn.Write(resp)
 		if err != nil {
