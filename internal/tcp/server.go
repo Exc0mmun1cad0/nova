@@ -7,6 +7,10 @@ import (
 	"net"
 )
 
+var (
+	buffSize = 512
+)
+
 type Handler interface {
 	Serve([]byte) []byte
 }
@@ -36,7 +40,7 @@ func (s *Server) ListenAndServe() {
 
 func (s *Server) handleConn(conn net.Conn) {
 	for {
-		buff := make([]byte, 100) // TODO: what size i need and where should i put it?
+		buff := make([]byte, buffSize)
 		n, err := conn.Read(buff)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
