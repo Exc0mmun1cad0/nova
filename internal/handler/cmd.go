@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"nova/internal/storage"
 	l "nova/pkg/logger"
 	"nova/pkg/resp"
 	"strconv"
@@ -28,6 +29,7 @@ var (
 	ErrWrongNumberOfArgs = "Wrong number of arguments for '%s' command"
 	ErrSyntax            = "syntax error"
 	ErrProtocol          = "Protocol error"
+	ErrWrongType         = "WRONGTYPE Operation against a key holding the wrong kind of value"
 )
 
 var (
@@ -68,14 +70,19 @@ func (h *Handler) getHandler(ctx context.Context, args []string) []byte {
 		return resp.EncodeError(response)
 	}
 	key := args[1]
-	value, ok := h.storage.Get(key)
-	if ok {
+
+	value, err := h.storage.Get(key)
+	switch err {
+	case storage.ErrKeyNotFound:
+		log.Info(responseMsg, zap.String("response", nullString))
+		return resp.NullString
+	case storage.ErrWrongType:
+		log.Info(responseMsg, zap.String("response", ErrWrongType))
+		return resp.EncodeError(ErrWrongType)
+	default:
 		log.Info(responseMsg, zap.String("response", value))
 		return resp.EncodeString(value)
 	}
-
-	log.Info(responseMsg, zap.String("response", nullString))
-	return resp.NullString
 }
 
 func (h *Handler) setHandler(ctx context.Context, args []string) []byte {
