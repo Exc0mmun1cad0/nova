@@ -13,7 +13,7 @@ import (
 
 type Storage interface {
 	Set(key, value string, ttl time.Duration)
-	Get(key string) (string, bool)
+	Get(key string) (string, error)
 	DeleteMany(keys []string) int
 }
 
