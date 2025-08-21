@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"nova/internal/storage"
 	l "nova/pkg/logger"
@@ -22,6 +23,7 @@ var (
 	cmdGet    = "get"
 	cmdSet    = "set"
 	cmdDelete = "del"
+	cmdRPush  = "rpush"
 )
 
 var (
@@ -141,4 +143,28 @@ func (h *Handler) deleteHandler(ctx context.Context, args []string) []byte {
 	count := h.storage.DeleteMany(args[1:])
 	log.Info(responseMsg, zap.Int("response", count))
 	return resp.EncodeInt(count)
+}
+
+func (h *Handler) rPushHandler(ctx context.Context, args []string) []byte {
+	var response string
+	log := l.FromContext(ctx)
+
+	if len(args) < 3 {
+		response = fmt.Sprintf(ErrWrongNumberOfArgs, cmdRPush)
+		log.Info(responseMsg, zap.String("response", response))
+		return resp.EncodeError(response)
+	}
+
+	var newLength int
+	var err error
+	for _, value := range args[2:] {
+		newLength, err = h.storage.RPush(args[1], value)
+		if errors.Is(err, storage.ErrWrongType) {
+			log.Info(responseMsg, zap.String("response", ErrWrongType))
+			return resp.EncodeError(ErrWrongType)
+		}
+	}
+
+	log.Info(responseMsg, zap.Int("response", newLength))
+	return resp.EncodeInt(newLength)
 }
