@@ -3,6 +3,7 @@ package mapstorage
 
 import (
 	"context"
+	ds "nova/pkg/datastructures"
 	"sync"
 	"time"
 )
@@ -19,8 +20,11 @@ type item struct {
 
 type Storage struct {
 	mu              sync.RWMutex
+
 	data            map[string]item
 	cleanupInterval time.Duration
+
+	lists map[string]*ds.LinkedList
 }
 
 func New(ctx context.Context, opts ...Option) *Storage {
@@ -38,14 +42,23 @@ func New(ctx context.Context, opts ...Option) *Storage {
 	return storage
 }
 
+// Set adds key-value pair with specified time-to-live. 
+// If there is a record of different data type with this key, it would be deleted.
 func (s *Storage) Set(key, value string, ttl time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// if ttl is not specified (equal nil), expiresAt would be nil
+	// which means that key-value record doesn't have expiration time
 	expiresAt := time.Time{}
 	if ttl != 0 {
 		expiresAt = time.Now().Add(ttl)
 	}
+
+	// delete list with similar key. There can be only one
+	delete(s.lists, key)
+
+	// add new item
 	s.data[key] = item{
 		value:     value,
 		expiresAt: expiresAt,
@@ -63,11 +76,19 @@ func (s *Storage) Get(key string) (string, bool) {
 	return item.value, true
 }
 
+// DeleteMany deletes all records with specified keys. Returns count of deleted records
 func (s *Storage) DeleteMany(keys []string) int {
 	count := 0
 
 	s.mu.Lock()
+	
+	// only one of if-blocks would be executed 
 	for _, key := range keys {
+		if _, ok := s.lists[key]; ok {
+			delete(s.lists, key)
+			count++
+		}
+
 		if el, ok := s.data[key]; ok && !isExpired(el) {
 			delete(s.data, key)
 			count++
