@@ -65,15 +65,21 @@ func (s *Storage) Set(key, value string, ttl time.Duration) {
 	}
 }
 
-func (s *Storage) Get(key string) (string, bool) {
+// Get returns value via given key. If there is no such value, ErrKeyNotFound is returned.
+func (s *Storage) Get(key string) (string, error) {
 	s.mu.RLock()
-	item, ok := s.data[key]
-	s.mu.RUnlock()
-	if !ok || isExpired(item) {
-		return "", false
+	defer s.mu.RUnlock()
+
+	if _, ok := s.lists[key]; ok {
+		return "", ErrWrongType
 	}
 
-	return item.value, true
+	item, ok := s.data[key]
+	if !ok || isExpired(item) {
+		return "", ErrKeyNotFound
+	}
+
+	return item.value, nil
 }
 
 // DeleteMany deletes all records with specified keys. Returns count of deleted records
