@@ -3,6 +3,7 @@ package mapstorage
 
 import (
 	"context"
+	"nova/internal/storage"
 	ds "nova/pkg/datastructures"
 	"sync"
 	"time"
@@ -71,12 +72,12 @@ func (s *Storage) Get(key string) (string, error) {
 	defer s.mu.RUnlock()
 
 	if _, ok := s.lists[key]; ok {
-		return "", ErrWrongType
+		return "", storage.ErrWrongType
 	}
 
 	item, ok := s.data[key]
 	if !ok || isExpired(item) {
-		return "", ErrKeyNotFound
+		return "", storage.ErrKeyNotFound
 	}
 
 	return item.value, nil

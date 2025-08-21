@@ -1,4 +1,4 @@
-package mapstorage
+package storage
 
 import "errors"
 
