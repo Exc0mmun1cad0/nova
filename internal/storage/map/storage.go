@@ -31,6 +31,7 @@ type Storage struct {
 func New(ctx context.Context, opts ...Option) *Storage {
 	storage := &Storage{
 		data:            map[string]item{},
+		lists:           map[string]*ds.LinkedList{},
 		cleanupInterval: defaultCleanupInterval,
 	}
 
