@@ -20,7 +20,7 @@ type item struct {
 }
 
 type Storage struct {
-	mu              sync.RWMutex
+	mu sync.RWMutex
 
 	data            map[string]item
 	cleanupInterval time.Duration
@@ -43,7 +43,7 @@ func New(ctx context.Context, opts ...Option) *Storage {
 	return storage
 }
 
-// Set adds key-value pair with specified time-to-live. 
+// Set adds key-value pair with specified time-to-live.
 // If there is a record of different data type with this key, it would be deleted.
 func (s *Storage) Set(key, value string, ttl time.Duration) {
 	s.mu.Lock()
@@ -88,8 +88,8 @@ func (s *Storage) DeleteMany(keys []string) int {
 	count := 0
 
 	s.mu.Lock()
-	
-	// only one of if-blocks would be executed 
+
+	// only one of if-blocks would be executed
 	for _, key := range keys {
 		if _, ok := s.lists[key]; ok {
 			delete(s.lists, key)
@@ -137,4 +137,22 @@ func (s *Storage) cleanup(ctx context.Context) {
 func isExpired(el item) bool {
 	expiresAt := el.expiresAt
 	return time.Now().After(expiresAt) && !expiresAt.IsZero()
+}
+
+// RPush adds new element to the end of the list available via given key.
+// It returns length of list after addition. If there is not such list, it is created.
+func (s *Storage) RPush(key, value string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if el, ok := s.data[key]; ok && !isExpired(el) {
+		return 0, storage.ErrWrongType
+	}
+
+	if _, ok := s.lists[key]; !ok {
+		s.lists[key] = ds.NewLinkedList()
+	}
+
+	length := s.lists[key].PushBack(value)
+	return length, nil
 }
