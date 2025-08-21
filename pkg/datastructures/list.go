@@ -47,51 +47,54 @@ func (ll *LinkedList) Get(index int) (string, bool) {
 }
 
 // PushForward inserts new node to the head of list.
-func (ll *LinkedList) PushForward(val string) {
+// It returns length of the list after adding new node.
+func (ll *LinkedList) PushForward(val string) int {
 	ll.length++
 
 	if ll.length == 1 {
 		newListNode := &ListNode{val: val}
 		ll.head = newListNode
 		ll.tail = newListNode
-		return
+	} else {
+		newListNode := &ListNode{val: val, next: ll.head}
+		ll.head.prev = newListNode
+		ll.head = newListNode
 	}
 
-	newListNode := &ListNode{val: val, next: ll.head}
-	ll.head.prev = newListNode
-	ll.head = newListNode
+	return ll.length
 }
 
 // PushBack inserts new node to the tail of list.
-func (ll *LinkedList) PushBack(val string) {
+// It returns length of the list after adding new node.
+func (ll *LinkedList) PushBack(val string) int {
 	ll.length++
 
 	if ll.length == 1 {
 		newListNode := &ListNode{val: val}
 		ll.head = newListNode
 		ll.tail = newListNode
-		return
+	} else {
+		newListNode := &ListNode{val: val, prev: ll.tail}
+		ll.tail.next = newListNode
+		ll.tail = newListNode
 	}
 
-	newListNode := &ListNode{val: val, prev: ll.tail}
-	ll.tail.next = newListNode
-	ll.tail = newListNode
+	return ll.length
 }
 
 // PushAtIndex inserts new node at the place of node with index.
-func (ll *LinkedList) PushAtIndex(index int, val string) {
+// It returns length of the list after adding new node or -1 in case of invalid index.
+func (ll *LinkedList) PushAtIndex(index int, val string) int {
 	if index > ll.length || index < 0 {
-		return
+		return -1
 	}
 
 	if index == 0 {
-		ll.PushForward(val)
-		return
+		return ll.PushForward(val)
 	}
 
 	if index == ll.length {
-		ll.PushBack(val)
-		return
+		return ll.PushBack(val)
 	}
 
 	var prev *ListNode // should be at index-1
@@ -113,6 +116,8 @@ func (ll *LinkedList) PushAtIndex(index int, val string) {
 	prev.next = newListNode
 	next.prev = newListNode
 	ll.length++
+
+	return ll.length
 }
 
 // PopForward deletes the node from the head of list.
