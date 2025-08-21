@@ -15,6 +15,8 @@ type Storage interface {
 	Set(key, value string, ttl time.Duration)
 	Get(key string) (string, error)
 	DeleteMany(keys []string) int
+	
+	RPush(key, value string) (int, error)
 }
 
 type Handler struct {
