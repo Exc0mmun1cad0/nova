@@ -199,6 +199,24 @@ func (s *Storage) LRange(key string, start, stop int) ([]string, error) {
 	return values, nil
 }
 
+// LPop pops first n elements from list via given key.
+func (s *Storage) LPop(key string, n int) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if el, ok := s.data[key]; ok && !isExpired(el) {
+		return []string{}, storage.ErrWrongType
+	}
+
+	list, ok := s.lists[key]
+	if !ok {
+		return []string{}, storage.ErrKeyNotFound
+	}
+
+	values := list.PopForwardNTimes(n)
+	return values, nil
+}
+
 func (s *Storage) ListLen(key string) (int, error) {
 	s.mu.RLock()
 	defer s.mu.RLock()
