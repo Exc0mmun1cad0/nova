@@ -161,6 +161,27 @@ func (s *Storage) RPush(key string, values []string) (int, error) {
 	return length, nil
 }
 
+// RPush adds new elements to the beginning of the list available via given key.
+// It returns length of list after addition. If there is not such list, it is created.
+func (s *Storage) LPush(key string, values []string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if el, ok := s.data[key]; ok && !isExpired(el) {
+		return 0, storage.ErrWrongType
+	}
+
+	if _, ok := s.lists[key]; !ok {
+		s.lists[key] = ds.NewLinkedList()
+	}
+
+	var length int
+	for _, value := range values {
+		length = s.lists[key].PushForward(value)
+	}
+	return length, nil
+}
+
 // LRange returns node values in range of indexes [start, stop].
 func (s *Storage) LRange(key string, start, stop int) ([]string, error) {
 	if el, ok := s.data[key]; ok && !isExpired(el) {
