@@ -157,3 +157,17 @@ func (s *Storage) RPush(key, value string) (int, error) {
 	length := s.lists[key].PushBack(value)
 	return length, nil
 }
+
+// LRange returns node values in range of indexes [start, stop].
+func (s *Storage) LRange(key string, start, stop int) ([]string, error) {
+	if el, ok := s.data[key]; ok && !isExpired(el) {
+		return nil, storage.ErrWrongType
+	}
+
+	if _, ok := s.lists[key]; !ok {
+		return nil, storage.ErrKeyNotFound
+	}
+
+	values := s.lists[key].LRange(start, stop)
+	return values, nil
+}
