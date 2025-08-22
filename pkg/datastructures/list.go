@@ -23,14 +23,11 @@ func NewLinkedList() *LinkedList {
 	}
 }
 
-// Get returns a value of the node on index.
-// If index is not valid, empty string and false would be returned.
-func (ll *LinkedList) Get(index int) (string, bool) {
-	if index < 0 || index >= ll.length {
-		return "", false
-	}
-
+// get returns pointer to node located at the specified index.
+// It MUST BE CALLED after validation that node at index exists.
+func (ll *LinkedList) get(index int) *ListNode {
 	var curr *ListNode
+
 	if index < ll.length/2 {
 		curr = ll.head
 		for range index {
@@ -43,6 +40,17 @@ func (ll *LinkedList) Get(index int) (string, bool) {
 		}
 	}
 
+	return curr
+}
+
+// Get returns a value of the node on index.
+// If index is not valid, empty string and false would be returned.
+func (ll *LinkedList) Get(index int) (string, bool) {
+	if index < 0 || index >= ll.length {
+		return "", false
+	}
+
+	curr := ll.get(index)
 	return curr.val, true
 }
 
@@ -97,18 +105,7 @@ func (ll *LinkedList) PushAtIndex(index int, val string) int {
 		return ll.PushBack(val)
 	}
 
-	var prev *ListNode // should be at index-1
-	if index-1 < ll.length/2 {
-		prev = ll.head
-		for range index - 1 {
-			prev = prev.next
-		}
-	} else {
-		prev = ll.tail
-		for range ll.length - index {
-			prev = prev.prev
-		}
-	}
+	prev := ll.get(index-1)
 	next := prev.next
 
 	// inserting itself
@@ -176,18 +173,7 @@ func (ll *LinkedList) PopAtIndex(index int) (string, bool) {
 		return ll.PopBack()
 	}
 
-	var curr *ListNode
-	if index < ll.length/2 {
-		curr = ll.head
-		for range index {
-			curr = curr.next
-		}
-	} else {
-		curr = ll.tail
-		for range ll.length - index - 1 {
-			curr = curr.prev
-		}
-	}
+	curr := ll.get(index)
 
 	// deleting itself
 	prev := curr.prev
