@@ -142,6 +142,29 @@ func (ll *LinkedList) PopForward() (string, bool) {
 	return result, true
 }
 
+// PopForwardNTimes pop n values from list and returns their values.
+// If n > ll.length, all values are returned and list becomes empty.
+func (ll *LinkedList) PopForwardNTimes(n int) []string {
+	n = min(n, ll.length)
+	values := make([]string, 0, n)
+
+	curr := ll.head
+	for range n {
+		values = append(values, curr.val)
+		curr = curr.next
+	}
+
+	if curr == nil {
+		ll.head, ll.tail = nil, nil
+		ll.length = 0
+	} else {
+		curr.prev = nil
+		ll.head = curr
+	}
+
+	return values
+}
+
 // PopBack deletes the node from the tail of list.
 // It returns value of deleted node.
 // Second value is false in case list is empty.
