@@ -105,7 +105,7 @@ func (ll *LinkedList) PushAtIndex(index int, val string) int {
 		return ll.PushBack(val)
 	}
 
-	prev := ll.get(index-1)
+	prev := ll.get(index - 1)
 	next := prev.next
 
 	// inserting itself
@@ -184,4 +184,28 @@ func (ll *LinkedList) PopAtIndex(index int) (string, bool) {
 	ll.length--
 
 	return curr.val, true
+}
+
+func (ll *LinkedList) LRange(start, stop int) []string {
+	// if first index is equal or greated than list length or stop > start,
+	// there are no values to return
+	if start >= ll.length {
+		return []string{}
+	}
+
+	result := []string{}
+
+	// first node in range
+	curr := ll.get(start)
+	result = append(result, curr.val)
+	// add to result next (stop-start) nodes
+	for range stop - start {
+		curr = curr.next
+		if curr == nil {
+			return result
+		}
+		result = append(result, curr.val)
+	}
+
+	return result
 }
