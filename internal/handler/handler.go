@@ -17,6 +17,7 @@ type Storage interface {
 	DeleteMany(keys []string) int
 	
 	RPush(key, value string) (int, error)
+	LRange(key string, start, stop int) ([]string, error)
 }
 
 type Handler struct {
