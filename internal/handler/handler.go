@@ -15,8 +15,9 @@ type Storage interface {
 	Set(key, value string, ttl time.Duration)
 	Get(key string) (string, error)
 	DeleteMany(keys []string) int
-	
+
 	RPush(key string, values []string) (int, error)
+	LPush(key string, values []string) (int, error)
 	LRange(key string, start, stop int) ([]string, error)
 }
 
@@ -38,7 +39,8 @@ func NewHandler(storage Storage) *Handler {
 		cmdSet:    h.setHandler,
 		cmdDelete: h.deleteHandler,
 
-		cmdRPush: h.rPushHandler,
+		cmdRPush:  h.rPushHandler,
+		cmdLPush:  h.lPushHandler,
 		cmdLRange: h.lRangeHandler,
 	}
 

@@ -24,6 +24,7 @@ var (
 	cmdSet    = "set"
 	cmdDelete = "del"
 	cmdRPush  = "rpush"
+	cmdLPush  = "lpush"
 	cmdLRange = "lrange"
 )
 
@@ -159,6 +160,26 @@ func (h *Handler) rPushHandler(ctx context.Context, args []string) []byte {
 	}
 
 	newLength, err := h.storage.RPush(args[1], args[2:])
+	if errors.Is(err, storage.ErrWrongType) {
+		log.Info(responseMsg, zap.String("response", ErrWrongType))
+		return resp.EncodeError(ErrWrongType)
+	}
+
+	log.Info(responseMsg, zap.Int("response", newLength))
+	return resp.EncodeInt(newLength)
+}
+
+func (h *Handler) lPushHandler(ctx context.Context, args []string) []byte {
+	var response string
+	log := l.FromContext(ctx)
+
+	if len(args) < 3 {
+		response = fmt.Sprintf(ErrWrongNumberOfArgs, cmdRPush)
+		log.Info(responseMsg, zap.String("response", response))
+		return resp.EncodeError(response)
+	}
+
+	newLength, err := h.storage.LPush(args[1], args[2:])
 	if errors.Is(err, storage.ErrWrongType) {
 		log.Info(responseMsg, zap.String("response", ErrWrongType))
 		return resp.EncodeError(ErrWrongType)
