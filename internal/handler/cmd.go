@@ -26,6 +26,7 @@ var (
 	cmdRPush  = "rpush"
 	cmdLPush  = "lpush"
 	cmdLRange = "lrange"
+	cmdLPop   = "lpop"
 	cmdLLen   = "llen"
 )
 
@@ -36,6 +37,7 @@ var (
 	ErrProtocol          = "Protocol error"
 	ErrWrongType         = "WRONGTYPE Operation against a key holding the wrong kind of value"
 	ErrInvalidInt        = "Value is not an integer or out of range"
+	ErrNegativeVal       = "value is out of range, must be positive"
 )
 
 var (
@@ -220,6 +222,52 @@ func (h *Handler) lRangeHandler(ctx context.Context, args []string) []byte {
 		return resp.NullArray
 	}
 
+	log.Info(responseMsg, zap.Strings("response", values))
+	return resp.EncodeArray(values)
+}
+
+func (h *Handler) lPopHandler(ctx context.Context, args []string) []byte {
+	log := l.FromContext(ctx)
+
+	if len(args) < 2 || len(args) > 3 {
+		response := fmt.Sprintf(ErrWrongNumberOfArgs, cmdLPop)
+		log.Info(responseMsg, zap.String("response", response))
+		return resp.EncodeError(response)
+	}
+
+	key := args[1]
+
+	if len(args) == 2 {
+		value, err := h.storage.LPop(key, 1)
+		if errors.Is(err, storage.ErrWrongType) {
+			log.Info(responseMsg, zap.String("response", ErrWrongType))
+			return resp.EncodeError(ErrWrongType)
+		}
+		if errors.Is(err, storage.ErrKeyNotFound) {
+			log.Info(responseMsg, zap.String("response", nullString))
+			return resp.NullString
+		}
+
+		log.Info(responseMsg, zap.String("response", value[0]))
+		return resp.EncodeString(value[0])
+	}
+
+	// len(args) == 3
+	n, err := strconv.Atoi(args[2])
+	if err != nil {
+		log.Info(responseMsg, zap.String("response", ErrNegativeVal))
+		return resp.EncodeError(ErrNegativeVal)
+	}
+
+	values, err := h.storage.LPop(key, n)
+	if errors.Is(err, storage.ErrWrongType) {
+		log.Info(responseMsg, zap.String("response", ErrWrongType))
+		return resp.EncodeError(ErrWrongType)
+	}
+	if errors.Is(err, storage.ErrKeyNotFound) {
+		log.Info(responseMsg, zap.String("response", nullString))
+		return resp.EncodeError(nullString)
+	}
 	log.Info(responseMsg, zap.Strings("response", values))
 	return resp.EncodeArray(values)
 }

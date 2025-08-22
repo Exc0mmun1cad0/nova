@@ -19,6 +19,7 @@ type Storage interface {
 	RPush(key string, values []string) (int, error)
 	LPush(key string, values []string) (int, error)
 	LRange(key string, start, stop int) ([]string, error)
+	LPop(key string, n int) ([]string, error)
 	ListLen(key string) (int, error)
 }
 
@@ -43,6 +44,7 @@ func NewHandler(storage Storage) *Handler {
 		cmdRPush:  h.rPushHandler,
 		cmdLPush:  h.lPushHandler,
 		cmdLRange: h.lRangeHandler,
+		cmdLPop:   h.lPopHandler,
 		cmdLLen:   h.lLenHandler,
 	}
 
