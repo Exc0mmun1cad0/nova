@@ -190,13 +190,13 @@ func (ll *LinkedList) PopAtIndex(index int) (string, bool) {
 func (ll *LinkedList) LRange(start, stop int) []string {
 	// if indexes are negative
 	if start < 0 {
-		start = start + 1 - ll.length
+		start = start + ll.length
 		if start < 0 {
 			return []string{}
 		}
 	}
 	if stop < 0 {
-		stop = stop + 1 - ll.length
+		stop = stop + ll.length
 		if stop < 0 {
 			return []string{}
 		}
