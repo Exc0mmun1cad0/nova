@@ -16,7 +16,7 @@ type Storage interface {
 	Get(key string) (string, error)
 	DeleteMany(keys []string) int
 	
-	RPush(key, value string) (int, error)
+	RPush(key string, values []string) (int, error)
 	LRange(key string, start, stop int) ([]string, error)
 }
 

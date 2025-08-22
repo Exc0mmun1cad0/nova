@@ -140,9 +140,9 @@ func isExpired(el item) bool {
 	return time.Now().After(expiresAt) && !expiresAt.IsZero()
 }
 
-// RPush adds new element to the end of the list available via given key.
+// RPush adds new elements to the end of the list available via given key.
 // It returns length of list after addition. If there is not such list, it is created.
-func (s *Storage) RPush(key, value string) (int, error) {
+func (s *Storage) RPush(key string, values []string) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -154,7 +154,10 @@ func (s *Storage) RPush(key, value string) (int, error) {
 		s.lists[key] = ds.NewLinkedList()
 	}
 
-	length := s.lists[key].PushBack(value)
+	var length int
+	for _, value := range values {
+		length = s.lists[key].PushBack(value)
+	}
 	return length, nil
 }
 
