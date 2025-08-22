@@ -43,6 +43,11 @@ func (ll *LinkedList) get(index int) *ListNode {
 	return curr
 }
 
+// Len is getter method for linked list length.
+func (ll *LinkedList) Len() int {
+	return ll.length
+}
+
 // Get returns a value of the node on index.
 // If index is not valid, empty string and false would be returned.
 func (ll *LinkedList) Get(index int) (string, bool) {
