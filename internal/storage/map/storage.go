@@ -184,6 +184,9 @@ func (s *Storage) LPush(key string, values []string) (int, error) {
 
 // LRange returns node values in range of indexes [start, stop].
 func (s *Storage) LRange(key string, start, stop int) ([]string, error) {
+	s.mu.RLock()
+	defer s.mu.RLock()
+
 	if el, ok := s.data[key]; ok && !isExpired(el) {
 		return nil, storage.ErrWrongType
 	}
