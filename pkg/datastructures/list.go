@@ -188,9 +188,9 @@ func (ll *LinkedList) PopAtIndex(index int) (string, bool) {
 
 // LRange returns node values from indexes in range [start, stop].
 func (ll *LinkedList) LRange(start, stop int) []string {
-	// if first index is equal or greated than list length or stop > start,
+	// if first index is equal or greated than list length or stop < start,
 	// there are no values to return
-	if start >= ll.length {
+	if start >= ll.length || stop < start {
 		return []string{}
 	}
 
