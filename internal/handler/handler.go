@@ -39,6 +39,7 @@ func NewHandler(storage Storage) *Handler {
 		cmdDelete: h.deleteHandler,
 
 		cmdRPush: h.rPushHandler,
+		cmdLRange: h.lRangeHandler,
 	}
 
 	h.dict = dict

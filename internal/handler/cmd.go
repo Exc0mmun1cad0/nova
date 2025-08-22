@@ -24,6 +24,7 @@ var (
 	cmdSet    = "set"
 	cmdDelete = "del"
 	cmdRPush  = "rpush"
+	cmdLRange = "lrange"
 )
 
 var (
@@ -32,12 +33,14 @@ var (
 	ErrSyntax            = "syntax error"
 	ErrProtocol          = "Protocol error"
 	ErrWrongType         = "WRONGTYPE Operation against a key holding the wrong kind of value"
+	ErrInvalidInt        = "Value is not an integer or out of range"
 )
 
 var (
 	responseMsg = "request completed"
 
 	nullString = "null"
+	nullArray  = "[]"
 )
 
 func (h *Handler) pingHandler(ctx context.Context, args []string) []byte {
@@ -167,4 +170,38 @@ func (h *Handler) rPushHandler(ctx context.Context, args []string) []byte {
 
 	log.Info(responseMsg, zap.Int("response", newLength))
 	return resp.EncodeInt(newLength)
+}
+
+func (h *Handler) lRangeHandler(ctx context.Context, args []string) []byte {
+	log := l.FromContext(ctx)
+
+	if len(args) != 4 {
+		response := fmt.Sprintf(ErrWrongNumberOfArgs, cmdLRange)
+		log.Info(responseMsg, zap.String("response", response))
+		return resp.EncodeError(response)
+	}
+
+	start, err := strconv.Atoi(args[2])
+	if err != nil {
+		log.Info(responseMsg, zap.String("response", ErrInvalidInt))
+		return resp.EncodeError(ErrInvalidInt)
+	}
+	stop, err := strconv.Atoi(args[3])
+	if err != nil {
+		log.Info(responseMsg, zap.String("response", ErrInvalidInt))
+		return resp.EncodeError(ErrInvalidInt)
+	}
+
+	values, err := h.storage.LRange(args[1], start, stop)
+	if errors.Is(err, storage.ErrWrongType) {
+		log.Info(responseMsg, zap.String("response", ErrWrongType))
+		return resp.EncodeError(ErrWrongType)
+	}
+	if errors.Is(err, storage.ErrKeyNotFound) {
+		log.Info(responseMsg, zap.String("response", nullArray))
+		return resp.NullArray
+	}
+
+	log.Info(responseMsg, zap.Strings("response", values))
+	return resp.EncodeArray(values)
 }
