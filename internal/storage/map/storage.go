@@ -198,3 +198,19 @@ func (s *Storage) LRange(key string, start, stop int) ([]string, error) {
 	values := s.lists[key].LRange(start, stop)
 	return values, nil
 }
+
+func (s *Storage) ListLen(key string) (int, error) {
+	s.mu.RLock()
+	defer s.mu.RLock()
+
+	if el, ok := s.data[key]; ok && !isExpired(el) {
+		return 0, storage.ErrWrongType
+	}
+
+	list, ok := s.lists[key]
+	if !ok {
+		return 0, storage.ErrKeyNotFound
+	}
+
+	return list.Len(), nil
+}
