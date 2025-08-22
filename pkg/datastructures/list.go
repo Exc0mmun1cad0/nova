@@ -196,14 +196,19 @@ func (ll *LinkedList) LRange(start, stop int) []string {
 	// if indexes are negative
 	if start < 0 {
 		start = start + ll.length
-		if start < 0 {
-			return []string{}
-		}
 	}
 	if stop < 0 {
 		stop = stop + ll.length
+	}
+
+	if stop < 0 {
+		return []string{}
+	}
+	if start < 0 {
 		if stop < 0 {
 			return []string{}
+		} else {
+			start = 0
 		}
 	}
 
