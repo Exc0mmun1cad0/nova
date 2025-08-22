@@ -89,7 +89,6 @@ func (s *Server) handleConn(conn net.Conn) {
 		s.requestCounter++
 		s.mu.Unlock()
 
-		log.Info("received request", zap.Int("bytes", n), zap.String("request", "here request text"))
 		ctx := l.WithLogger(context.Background(), log)
 		resp := s.Handler.Serve(ctx, buff[:n])
 
