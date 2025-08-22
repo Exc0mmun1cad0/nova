@@ -8,6 +8,7 @@ import (
 
 var (
 	NullString = []byte("$-1\r\n")
+	NullArray = []byte("*0\r\n")
 )
 
 func EncodeSimpleString(str string) []byte {
