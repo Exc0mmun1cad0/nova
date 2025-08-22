@@ -26,6 +26,7 @@ var (
 	cmdRPush  = "rpush"
 	cmdLPush  = "lpush"
 	cmdLRange = "lrange"
+	cmdLLen   = "llen"
 )
 
 var (
@@ -221,4 +222,27 @@ func (h *Handler) lRangeHandler(ctx context.Context, args []string) []byte {
 
 	log.Info(responseMsg, zap.Strings("response", values))
 	return resp.EncodeArray(values)
+}
+
+func (h *Handler) lLenHandler(ctx context.Context, args []string) []byte {
+	log := l.FromContext(ctx)
+
+	if len(args) != 2 {
+		response := fmt.Sprintf(ErrWrongNumberOfArgs, cmdLLen)
+		log.Info(responseMsg, zap.String("response", response))
+		return resp.EncodeError(response)
+	}
+
+	length, err := h.storage.ListLen(args[1])
+	if errors.Is(err, storage.ErrWrongType) {
+		log.Info(responseMsg, zap.String("response", ErrWrongType))
+		return resp.EncodeError(ErrWrongType)
+	}
+	if errors.Is(err, storage.ErrKeyNotFound) {
+		log.Info(responseMsg, zap.Int("response", 0))
+		return resp.EncodeInt(0)
+	}
+
+	log.Info(responseMsg, zap.Int("response", length))
+	return resp.EncodeInt(length)
 }

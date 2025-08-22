@@ -19,6 +19,7 @@ type Storage interface {
 	RPush(key string, values []string) (int, error)
 	LPush(key string, values []string) (int, error)
 	LRange(key string, start, stop int) ([]string, error)
+	ListLen(key string) (int, error)
 }
 
 type Handler struct {
@@ -42,6 +43,7 @@ func NewHandler(storage Storage) *Handler {
 		cmdRPush:  h.rPushHandler,
 		cmdLPush:  h.lPushHandler,
 		cmdLRange: h.lRangeHandler,
+		cmdLLen:   h.lLenHandler,
 	}
 
 	h.dict = dict
