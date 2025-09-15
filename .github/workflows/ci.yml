@@ -1,0 +1,44 @@
+name: CI
+
+run-name: CI workflow
+
+on:
+    push:
+        branches:
+          - dev
+          - main
+
+jobs:
+    ci:
+        runs-on: ubuntu-24.04
+
+        steps:
+          - uses: actions/checkout@v4
+
+          - name: Set up Go
+            uses: actions/setup-go@v5
+            with:
+                go-version: 1.24.0
+                cache: true
+                cache-dependency-path: go.sum
+
+          - name: Display go version
+            run: |
+              go version
+        
+          - name: Install deps
+            run: go mod verify
+        
+          - name: Verify go.mod is tidy
+            run: go mod tidy
+
+          - name: Run linters
+            uses: golangci/golangci-lint-action@v8
+        
+          - name: Verify build
+            run: go build -o nova main.go
+        
+          - name: Run unit-tests
+            run: go test -v ./...
+        
+        
