@@ -17,7 +17,8 @@ import (
 type handlerFunc func(context.Context, []string) []byte
 
 var (
-	cmdInfo   = "info"
+	// TODO: implement info command
+	// cmdInfo   = "info"
 	cmdPing   = "ping"
 	cmdEcho   = "echo"
 	cmdGet    = "get"
